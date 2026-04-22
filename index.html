@@ -294,10 +294,22 @@ tbody td {
 .right-col { display: flex; flex-direction: column; gap: 12px; }
 
 /* ── 차트 ── */
-.chart-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-.legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text2); }
-.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-.chart-wrap { position: relative; width: 100%; height: 150px; }
+.chart-legend { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.legend-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 10px; color: var(--text2);
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.legend-label { font-weight: 600; color: var(--text1); min-width: 14px; }
+.legend-count { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text1); }
+.legend-ratio {
+  font-size: 9px; color: var(--text3);
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 1px 5px; border-radius: 3px; font-family: var(--mono);
+}
+.legend-bar-wrap { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; min-width: 20px; }
+.legend-bar { height: 100%; border-radius: 2px; transition: width .4s; }
+.chart-wrap { position: relative; width: 100%; height: 140px; }
 
 /* ── 경고 ── */
 .warn-list { display: flex; flex-direction: column; gap: 5px; }
@@ -415,16 +427,16 @@ tbody td {
   <div class="header-left">
     <div class="header-eyebrow">SCM · 외주생산파트</div>
     <div class="header-title">협력사 공급망 KPI 대시보드</div>
-    <div class="header-sub" id="headerSub">26.04 담당자 기준 · 분기 예측 점수 적용</div>
+    <div class="header-sub" id="headerSub">26.2Q 발주담당 기준 · 분기 예측 점수 적용 · 2026.04.22 기준</div>
   </div>
   <div class="header-right">
     <div class="upd-badge">
       <span class="dot"></span>
-      <span id="updLabel">마지막 업데이트: <strong>2026년 4월 21일</strong></span>
+      <span id="updLabel">마지막 업데이트: <strong>2026년 4월 22일</strong></span>
     </div>
-    <label class="upload-btn">
+    <label class="upload-btn" title="SCM_KPI_외주생산파트.xlsx 파일을 업로드하면 데이터가 갱신됩니다">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      xlsx 업로드로 데이터 갱신
+      xlsx 업로드 (공급망_분기별평가 시트)
       <input type="file" id="xlsxUp" accept=".xlsx,.xls" onchange="loadXlsx(this)">
     </label>
   </div>
@@ -493,7 +505,7 @@ tbody td {
         </colgroup>
         <thead>
           <tr>
-            <th>협력사</th><th>담당</th><th>등급</th>
+            <th>협력사</th><th>담당</th><th>현재등급</th>
             <th>총점(분기예측)</th><th>TASK</th><th>매입금액(원)</th><th>이슈율 / 미입하율</th>
           </tr>
         </thead>
@@ -506,8 +518,10 @@ tbody td {
   <div class="right-col">
     <div class="panel">
       <div class="panel-title">등급 분포</div>
-      <div class="chart-legend" id="chartLegend"></div>
-      <div class="chart-wrap"><canvas id="gc" role="img" aria-label="협력사 등급 분포"></canvas></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="chart-legend" id="chartLegend" style="flex:1;margin-bottom:0"></div>
+        <div class="chart-wrap" style="width:120px;height:120px;flex-shrink:0"><canvas id="gc" role="img" aria-label="협력사 등급 분포"></canvas></div>
+      </div>
     </div>
     <div class="panel">
       <div class="panel-title">경고 및 알림</div>
@@ -584,12 +598,16 @@ function calcKPI(r) {
 }
 
 /* ──────────────── RAW 데이터 ──────────────── */
-const RAW = [["(주)청산인쇄","이난영",152,81634765,11,0,"7.2%","0.0%",2,2,3,2,9,"B"],["(주)승화파트너스","김민지",72,48728030,5,0,"6.9%","0.0%",1,1,3,2,7,"B"],["엠알오즈(MROZ)","육승미",168,92155493,2,3,"1.2%","1.8%",2,2,1,3,8,"B"],["주식회사 디자인오엔","김민지",52,15722308,6,1,"11.5%","1.9%",1,1,3,2,7,"B"],["성우무역","김민정",3,8154400,1,2,"33.3%","66.7%",1,1,3,1,6,"B"],["서울디지털인쇄협동조합","육승미",1119,446946322,25,2,"2.2%","0.2%",3,3,1,3,10,"A"],["주식회사 꾸띠잔홀딩스","이난영",40,16464688,0,2,"0.0%","5.0%",1,1,1,2,5,"C"],["제이에이 코퍼레이션 (JA Corp.)","김민지",10,6477090,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)쉔코리아","육승미",4,18984163,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["주식회사 모아패키지","이난영",30,12581757,3,2,"10.0%","6.7%",1,1,3,1,6,"B"],["주식회사 알리오코리아","김민지",25,15166941,3,0,"12.0%","0.0%",1,1,3,1,6,"B"],["주식회사 세라노","김민지",11,3431724,2,0,"18.2%","0.0%",1,1,3,2,7,"B"],["개미기획","김민지",123,84557816,10,2,"8.1%","1.6%",2,2,3,1,8,"B"],["주식회사 따벨라","육승미",14,6758229,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)주니어 빌리지","김민정",0,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)명성","김하은",16,3723855,1,0,"6.3%","0.0%",1,1,3,1,6,"B"],["유엘상사","김민지",45,26800893,2,0,"4.4%","0.0%",1,1,2,1,5,"C"],["엔엠텍코리아주식회사","김민지",18,27492547,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 드리온","김민정",0,250250,2,0,"0.0%","0.0%",1,1,1,1,4,"C"],["디지탈준","이난영",0,0,0,0,"0.0%","0.0%",1,1,1,3,6,"B"],["주식회사 코스맥스코리아","김민정",4,2327539,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)에스씨인터내셔널","김하은",1,265650,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["마이 패스포트(Mai Passport)","김민지",5,5867400,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["크루티","김민지",4,1969440,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["유어백","김민지",18,21750057,0,2,"0.0%","11.1%",1,1,1,1,4,"C"],["톰스코리아 주식회사","김민지",3,2390080,1,0,"33.3%","0.0%",1,1,3,2,7,"B"],["(주)이삭반도체","육승미",18,17161539,1,0,"5.6%","0.0%",1,1,3,2,7,"B"],["빅스타","김민지",7,3012570,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["하이온","김민정",4,1652970,0,1,"0.0%","25.0%",1,1,1,1,4,"C"],["아이티에스글로벌(ITSGlobal)","육승미",1,72600,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)아이아트텍스","김민지",7,5635663,3,0,"42.9%","0.0%",1,1,3,1,6,"B"],["주식회사 에벤에셀기업","김민정",48,36265977,3,6,"6.3%","12.5%",1,1,3,1,6,"B"],["유노타월 유노디자인","김민지",30,33878464,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["올댓프린팅","육승미",52,22611563,3,1,"5.8%","1.9%",1,1,3,2,7,"B"],["엘바 (ELVA)","김하은",22,22719734,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["비투비 커머스","김민정",1,1202212,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["시티핸즈캄퍼니","김하은",0,0,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["주식회사 베러웨이시스템즈","이난영",16,10948847,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["주식회사 오보틀","김하은",5,4221998,5,1,"100.0%","20.0%",1,1,3,2,7,"B"],["데이비드테크(주)","육승미",11,3978680,2,0,"18.2%","0.0%",1,1,3,1,6,"B"],["신명인쇄","김민지",81,49274196,8,5,"9.9%","6.2%",1,1,3,3,8,"B"],["디케이에스에이치코리아(주)","육승미",2,237129,0,1,"0.0%","50.0%",1,1,1,1,4,"C"],["강천FNT","김영준",21,5693938,5,2,"23.8%","9.5%",1,1,3,3,8,"B"],["이지굿스","김영준",49,18461864,9,1,"18.4%","2.0%",1,1,3,1,6,"B"],["키멤버스","김민정",2,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["감성코퍼레이션 주식회사","김민정",26,23788055,2,3,"7.7%","11.5%",1,1,3,1,6,"B"],["(주)바른스포츠","김하은",3,152460,1,0,"33.3%","0.0%",1,1,3,2,7,"B"],["(주)유닉스글로벌","김하은",7,4509840,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["미쓰비시연필한국판매 주식회사","육승미",7,9431785,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)데코컴퍼니","김하은",8,8493540,1,0,"12.5%","0.0%",1,1,3,1,6,"B"],["모토잉","육승미",9,2080595,1,0,"11.1%","0.0%",1,1,3,1,6,"B"],["주식회사 센트온","김하은",4,5615720,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["이모텔리","육승미",2,408150,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["어썸리(구. 비코어랩)","김민지",3,949500,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["와이이케이글래스주식회사","김민지",2,1587960,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["주식회사 피앤더블유인터네셔널","육승미",24,7694710,4,4,"16.7%","16.7%",1,1,3,1,6,"B"],["(주)성원제약","김민정",0,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 기억니은 (구. 화영)","육승미",22,10247853,1,0,"4.5%","0.0%",1,1,2,1,5,"C"],["착한포장","육승미",18,19574655,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 디비더블유디(구.디자인방위대)","김하은",3,2733600,1,2,"33.3%","66.7%",1,1,3,1,6,"B"],["홍보요업","김민지",3,1646590,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["주식회사 더블에이치","육승미",13,24251198,5,0,"38.5%","0.0%",1,1,3,2,7,"B"],["주식회사 큐엘앤컴퍼니","김하은",3,2058100,0,1,"0.0%","33.3%",1,1,1,1,4,"C"],["백타운 (Bagtown)","김민지",2,721787,1,1,"50.0%","50.0%",1,1,3,1,6,"B"],["주식회사 위즈프로(구.호언)","김영준",3,273724,0,2,"0.0%","66.7%",1,1,1,3,6,"B"],["윈브릿지","김민지",5,4588870,3,0,"60.0%","0.0%",1,1,3,1,6,"B"],["(주)이케이비전","육승미",1,100980,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)홍기씨앤디","김민지",13,27457675,1,2,"7.7%","15.4%",1,1,3,2,7,"B"],["주식회사 클라고","김민정",3,6325700,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)제이컴정보통신","김민정",3,2627780,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)우와","김민지",1,77440,1,0,"100.0%","0.0%",1,1,3,3,8,"B"],["(주)이지앤","김민정",0,0,0,0,"0.0%","0.0%",1,1,1,3,6,"B"],["주식회사 아조아(AJOAH)","김하은",1,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["RD상사(세나토코리아)","김하은",8,2985235,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 에이엠씨","김민지",8,3932140,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["타우하이텍","김민지",34,64010644,1,0,"2.9%","0.0%",1,2,1,2,6,"B"],["(주)피알판촉","김하은",0,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 이루커머스","김민지",5,3809740,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 케이디엠제이","김민지",3,6361300,0,0,"0.0%","0.0%",1,1,1,3,6,"B"],["(주)영인기프트","김하은",11,14814049,2,0,"18.2%","0.0%",1,1,3,1,6,"B"],["(주)루메나","육승미",1,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["디에이치 코퍼레이션","김민정",0,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["보소코리아","김하은",7,16919304,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["가온팩토리","김민지",4,862950,0,2,"0.0%","50.0%",1,1,1,2,5,"C"],["주식회사 케이디앤지","육승미",1,152790,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["믿음뒤나미스","김민지",0,0,0,0,"0.0%","0.0%",1,1,1,3,6,"B"],["그리닉","육승미",10,3277340,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["협립코리아","육승미",5,1490730,1,0,"20.0%","0.0%",1,1,3,1,6,"B"],["(주)파워","김민정",4,4786760,1,0,"25.0%","0.0%",1,1,3,1,6,"B"],["하나 세라믹","김민지",3,16329900,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주)상일씨앤씨","김민지",2,2844160,0,1,"0.0%","50.0%",1,1,1,2,5,"C"],["주식회사 라이클","김하은",17,21986434,0,1,"0.0%","5.9%",1,1,1,1,4,"C"],["아인 디스트리뷰션","김영준",8,2519268,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["마르멜로","김민지",3,508970,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["(주)스타양행","김민지",3,2845930,1,0,"33.3%","0.0%",1,1,3,1,6,"B"],["주식회사 케이원랩(KWON LAB)","김민지",21,60838118,0,3,"0.0%","14.3%",1,2,1,2,6,"B"],["유성(구.유성테프)","김하은",8,10195350,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["공방플러스위드","육승미",10,3334645,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["모아산업","김민지",0,0,0,0,"0.0%","0.0%",1,1,1,3,6,"B"],["주식회사 제이더블유굿즈","육승미",2,177650,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 마이크래프트","김민지",4,7021410,0,0,"0.0%","0.0%",1,1,1,2,5,"C"],["도매박스&뉴제이스포츠","김하은",2,937100,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["혜림봉투","문경선",0,0,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["이고다포장","문경선",0,0,0,0,"0.0%","0.0%",1,1,1,0,3,"C"],["제이디패키지","문경선",0,0,0,0,"0.0%","0.0%",1,1,1,0,3,"C"],["네추럴 폼","문경선",0,0,0,0,"0.0%","0.0%",1,1,1,0,3,"C"],["상인몰","문경선",0,0,0,0,"0.0%","0.0%",1,1,1,0,3,"C"],["비닐24","문경선",0,0,1,0,"0.0%","0.0%",1,1,1,0,3,"C"],["(주)효성에스피","김하은",7,2857855,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["에이피피몰","김하은",4,2589400,2,0,"50.0%","0.0%",1,1,3,1,6,"B"],["주식회사 이우피앤씨","김하은",1,1196800,2,0,"200.0%","0.0%",1,1,3,2,7,"B"],["우리포장","육승미",4,4345000,2,0,"50.0%","0.0%",1,1,3,1,6,"B"],["기프트인포 주식회사","김하은",2,1130250,1,1,"50.0%","50.0%",1,1,3,2,7,"B"],["라온누리","김민정",1,1068100,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["현일에스앤피랩","김하은",2,256355,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["(주) 모나미","김민정",4,1417700,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["Dongguan JinEn Electronics Co., Ltd","김민정",1,811030,1,0,"100.0%","0.0%",1,1,3,1,6,"B"],["XIAMEN HONGJIA INDUSTRY CO.,LTD","김민정",2,4393070,0,1,"0.0%","50.0%",1,1,1,1,4,"C"],["도로어워드","김영준",1,1789040,0,0,"0.0%","0.0%",1,1,1,1,4,"C"],["주식회사 프래그(PRAG Corp.)","김영준",5,6527620,2,2,"40.0%","40.0%",0,0,0,0,0,"C"],["신시어리웨일즈 주식회사","정승윤",1169,0,0,0,"0.0%","0.0%",3,1,1,3,8,"B"]];
+const RAW = [["(주)청산인쇄", "이난영", 152, 81634765, 11, 0, "7.2%", "0.0%", 0, 0, 0, 2, 3, 12, "A"], ["(주)승화파트너스", "김민지", 72, 48728030, 5, 0, "6.9%", "0.0%", 0, 0, 0, 2, 2, 7, "B"], ["엠알오즈(MROZ)", "육승미", 168, 92155493, 2, 3, "1.2%", "1.8%", 0, 0, 0, 3, 3, 8, "B"], ["주식회사 디자인오엔", "김민지", 52, 15722308, 6, 1, "11.5%", "1.9%", 0, 0, 0, 2, 2, 7, "B"], ["성우무역", "김민정", 3, 8154400, 1, 2, "33.3%", "66.7%", 0, 0, 0, 1, 3, 6, "B"], ["서울디지털인쇄협동조합", "육승미", 1119, 446946322, 25, 2, "2.2%", "0.2%", 0, 0, 0, 3, 3, 10, "A"], ["주식회사 꾸띠잔홀딩스", "이난영", 40, 16464688, 0, 2, "0.0%", "5.0%", 0, 0, 0, 2, 3, 5, "C"], ["제이에이 코퍼레이션 (JA Corp.)", "김민지", 10, 6477090, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)쉔코리아", "육승미", 4, 18984163, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 모아패키지", "이난영", 30, 12581757, 3, 2, "10.0%", "6.7%", 0, 0, 0, 1, 2, 6, "B"], ["주식회사 알리오코리아", "김민지", 25, 15166941, 3, 0, "12.0%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["주식회사 세라노", "김민지", 11, 3431724, 2, 0, "18.2%", "0.0%", 0, 0, 0, 2, 3, 7, "B"], ["개미기획", "김민지", 123, 84557816, 10, 2, "8.1%", "1.6%", 0, 0, 0, 1, 3, 8, "B"], ["주식회사 따벨라", "육승미", 14, 6758229, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)주니어 빌리지", "김민정", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 2, 4, "C"], ["(주)명성", "김하은", 16, 3723855, 1, 0, "6.2%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["유엘상사", "김민지", 45, 26800893, 2, 0, "4.4%", "0.0%", 0, 0, 0, 1, 3, 5, "C"], ["엔엠텍코리아주식회사", "김민지", 18, 27492547, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 드리온", "김민정", 0, 250250, 2, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["디지탈준", "이난영", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 3, 3, 6, "B"], ["주식회사 코스맥스코리아", "김민정", 4, 2327539, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)에스씨인터내셔널", "김하은", 1, 265650, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["마이 패스포트(Mai Passport)", "김민지", 5, 5867400, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["크루티", "김민지", 4, 1969440, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 2, 4, "C"], ["유어백", "김민지", 18, 21750057, 0, 2, "0.0%", "11.1%", 0, 0, 0, 1, 2, 4, "C"], ["톰스코리아 주식회사", "김민지", 3, 2390080, 1, 0, "33.3%", "0.0%", 0, 0, 0, 2, 2, 7, "B"], ["(주)이삭반도체", "육승미", 18, 17161539, 1, 0, "5.6%", "0.0%", 0, 0, 0, 2, 3, 7, "B"], ["빅스타", "김민지", 7, 3012570, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 2, 4, "C"], ["하이온", "김민정", 4, 1652970, 0, 1, "0.0%", "25.0%", 0, 0, 0, 1, 3, 4, "C"], ["아이티에스글로벌(ITSGlobal)", "김민지", 1, 72600, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 2, 4, "C"], ["(주)아이아트텍스", "김민지", 7, 5635663, 3, 0, "42.9%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["주식회사 에벤에셀기업", "김민정", 48, 36265977, 3, 6, "6.2%", "12.5%", 0, 0, 0, 1, 3, 6, "B"], ["유노타월 유노디자인", "김민지", 30, 33878464, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["올댓프린팅", "육승미", 52, 22611563, 3, 1, "5.8%", "1.9%", 0, 0, 0, 2, 3, 7, "B"], ["엘바 (ELVA)", "김하은", 22, 22719734, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["비투비 커머스", "김민정", 1, 1202212, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["시티핸즈캄퍼니", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 베러웨이시스템즈", "김영준", 16, 10948847, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 오보틀", "김하은", 5, 4221998, 5, 1, "100.0%", "20.0%", 0, 0, 0, 2, 3, 7, "B"], ["데이비드테크(주)", "육승미", 11, 3978680, 2, 0, "18.2%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["신명인쇄", "김민지", 81, 49274196, 8, 5, "9.9%", "6.2%", 0, 0, 0, 3, 3, 8, "B"], ["디케이에스에이치코리아(주)", "육승미", 2, 237129, 0, 1, "0.0%", "50.0%", 0, 0, 0, 1, 3, 4, "C"], ["강천FNT", "이난영", 21, 5693938, 5, 2, "23.8%", "9.5%", 0, 0, 0, 3, 3, 8, "B"], ["이지굿스", "육승미", 49, 18461864, 9, 1, "18.4%", "2.0%", 0, 0, 0, 1, 3, 6, "B"], ["키멤버스", "김민정", 2, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["감성코퍼레이션 주식회사", "김민정", 26, 23788055, 2, 3, "7.7%", "11.5%", 0, 0, 0, 1, 3, 6, "B"], ["(주)바른스포츠", "김하은", 3, 152460, 1, 0, "33.3%", "0.0%", 0, 0, 0, 2, 3, 7, "B"], ["(주)유닉스글로벌", "김하은", 7, 4509840, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["미쓰비시연필한국판매 주식회사", "김하은", 7, 9431785, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)데코컴퍼니", "김하은", 8, 8493540, 1, 0, "12.5%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["모토잉", "육승미", 9, 2080595, 1, 0, "11.1%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["주식회사 센트온", "김하은", 4, 5615720, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["이모텔리", "육승미", 2, 408150, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["어썸리(구. 비코어랩)", "김민지", 3, 949500, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 2, 4, "C"], ["와이이케이글래스주식회사", "김민지", 2, 1587960, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 피앤더블유인터네셔널", "육승미", 24, 7694710, 4, 4, "16.7%", "16.7%", 0, 0, 0, 1, 3, 6, "B"], ["(주)성원제약", "김민정", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 기억니은 (구. 화영)", "육승미", 22, 10247853, 1, 0, "4.5%", "0.0%", 0, 0, 0, 1, 3, 5, "C"], ["착한포장", "육승미", 18, 19574655, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 2, 4, "C"], ["주식회사 디비더블유디(구.디자인방위대)", "김하은", 3, 2733600, 1, 2, "33.3%", "66.7%", 0, 0, 0, 1, 3, 6, "B"], ["홍보요업", "김민지", 3, 1646590, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 더블에이치", "이난영", 13, 24251198, 5, 0, "38.5%", "0.0%", 0, 0, 0, 2, 3, 7, "B"], ["주식회사 큐엘앤컴퍼니", "김하은", 3, 2058100, 0, 1, "0.0%", "33.3%", 0, 0, 0, 1, 3, 4, "C"], ["백타운 (Bagtown)", "김민지", 2, 721787, 1, 1, "50.0%", "50.0%", 0, 0, 0, 1, 3, 6, "B"], ["주식회사 위즈프로(구.호언)", "이난영", 3, 273724, 0, 2, "0.0%", "66.7%", 0, 0, 0, 3, 3, 6, "B"], ["윈브릿지", "김민지", 5, 4588870, 3, 0, "60.0%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["(주)이케이비전", "김민지", 1, 100980, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)홍기씨앤디", "김민지", 13, 27457675, 1, 2, "7.7%", "15.4%", 0, 0, 0, 2, 3, 7, "B"], ["주식회사 클라고", "김민정", 3, 6325700, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)제이컴정보통신", "김민정", 3, 2627780, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)우와", "김민지", 1, 77440, 1, 0, "100.0%", "0.0%", 0, 0, 0, 3, 3, 8, "B"], ["(주)이지앤", "김민정", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 3, 3, 6, "B"], ["주식회사 아조아(AJOAH)", "김하은", 1, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["RD상사(세나토코리아)", "김하은", 8, 2985235, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 에이엠씨", "김민지", 8, 3932140, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["타우하이텍", "김민지", 34, 64010644, 1, 0, "2.9%", "0.0%", 0, 0, 0, 2, 3, 6, "B"], ["(주)피알판촉", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 이루커머스", "김민지", 5, 3809740, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 케이디엠제이", "김민지", 3, 6361300, 0, 0, "0.0%", "0.0%", 0, 0, 0, 3, 3, 6, "B"], ["(주)영인기프트", "김하은", 11, 14814049, 2, 0, "18.2%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["(주)루메나", "육승미", 1, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["디에이치 코퍼레이션", "이난영", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 2, 4, "C"], ["(주)포텍", "졸업", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 1, 4, "C"], ["보소코리아", "김하은", 7, 16919304, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["블록가든", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["가온팩토리", "김민지", 4, 862950, 0, 2, "0.0%", "50.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 케이디앤지", "육승미", 1, 152790, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["믿음뒤나미스", "김민지", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 3, 3, 6, "B"], ["주식회사 유경", "졸업", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 1, 4, "C"], ["주식회사 오피스델리", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["그리닉", "육승미", 10, 3277340, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["협립코리아", "육승미", 5, 1490730, 1, 0, "20.0%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["(주)파워", "졸업", 4, 4786760, 1, 0, "25.0%", "0.0%", 0, 0, 0, 1, 1, 6, "B"], ["하나 세라믹", "김민지", 3, 16329900, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)상일씨앤씨", "김민지", 2, 2844160, 0, 1, "0.0%", "50.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 라이클", "김하은", 17, 21986434, 0, 1, "0.0%", "5.9%", 0, 0, 0, 1, 3, 4, "C"], ["인더보썸", "김민지", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["아인 디스트리뷰션", "이난영", 8, 2519268, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 에코에이스", "김하은", 0, 111100, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["마르멜로", "김민지", 3, 508970, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 블루윈", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주)스타양행", "김민지", 3, 2845930, 1, 0, "33.3%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["주식회사 케이원랩(KWON LAB)", "김민지", 21, 60838118, 0, 3, "0.0%", "14.3%", 0, 0, 0, 2, 3, 6, "B"], ["유성(구.유성테프)", "김하은", 8, 10195350, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["공방플러스위드", "육승미", 10, 3334645, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["투리빙", "김민지", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["아이큐아이", "졸업", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 1, 4, "C"], ["모아산업", "졸업", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 3, 1, 6, "B"], ["아딤(ADIM)", "김민지", 0, 635800, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["주식회사 제이더블유굿즈", "육승미", 2, 177650, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 마이크래프트", "김민지", 4, 7021410, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["웰빙세라믹스", "김민지", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["도매박스&뉴제이스포츠", "김하은", 2, 937100, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["혜림봉투", "문경선", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 1, 4, "C"], ["이고다포장", "문경선", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 0, 1, 3, "C"], ["제이디패키지", "문경선", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 0, 1, 3, "C"], ["네추럴 폼", "문경선", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 0, 1, 3, "C"], ["상인몰", "문경선", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 0, 1, 3, "C"], ["비닐24", "문경선", 0, 0, 1, 0, "0.0%", "0.0%", 0, 0, 0, 0, 1, 3, "C"], ["(주)효성에스피", "김하은", 7, 2857855, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["바네사381", "육승미", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["리본마루", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["명품전사", "김민지", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["(주)영일패키지", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 두버디", "김민지", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["제이엔에스", "김민지", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["민영종합상사", "김하은", 2, 1128764, 0, 1, "0.0%", "50.0%", 0, 0, 0, 2, 3, 5, "C"], ["에이피피몰", "김하은", 4, 2589400, 2, 0, "50.0%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["주식회사 이우피앤씨", "김하은", 1, 1196800, 1, 0, "100.0%", "0.0%", 0, 0, 0, 2, 3, 7, "B"], ["평화산업", "김하은", 1, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["우리포장", "육승미", 4, 4345000, 2, 0, "50.0%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["성현산업(주)", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["기프트인포 주식회사", "김하은", 2, 1130250, 1, 1, "50.0%", "50.0%", 0, 0, 0, 2, 3, 7, "B"], ["더패키징", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["라온누리", "김민정", 1, 1068100, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["효제지업사", "김하은", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["현일에스앤피랩", "김하은", 2, 256355, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["(주) 모나미", "김민정", 4, 1417700, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["Shenzhen Xin Hong Yang Packaging Products Co., Ltd.", "김민정", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["Dongguan JinEn Electronics Co., Ltd", "김민정", 1, 811030, 1, 0, "100.0%", "0.0%", 0, 0, 0, 1, 3, 6, "B"], ["XIAMEN HONGJIA INDUSTRY CO.,LTD", "김민정", 2, 4393070, 0, 1, "0.0%", "50.0%", 0, 0, 0, 1, 3, 4, "C"], ["ZHEJIANG CHUANCHENG PACKAGING PRODUCTS CO.,LIMITED", "김민정", 2, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["Dongguan Wik Electronic Technology Co., Ltd.", "김민정", 0, 2427855, 1, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["Dongguan City Newway Stationery Co., Limited", "김민정", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["Anhui Highkey Import& Export Co., Ltd", "김민정", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["Protecting Your Electronics (PYE) Electronic Technology Co., Ltd", "김민정", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["도로어워드", "이난영", 1, 1789040, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["주식회사 더블유엔피", "육승미", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["제로코리아 주식회사(ZERO KOREA Co. , Ltd)", "육승미", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 2, 3, 5, "C"], ["진필(JINPIL)", "육승미", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 1, 3, 4, "C"], ["오아 주식회사", "정승윤", 0, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 0, 1, 3, "C"], ["주식회사 프래그(PRAG Corp.)", "김영준", 5, 6527620, 2, 2, "40.0%", "40.0%", 0, 0, 0, 0, 1, null, null], ["주식회사 미인골드", "김영준", 3, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 0, 1, null, null], ["신시어리웨일즈 주식회사", "미지정", 1169, 0, 0, 0, "0.0%", "0.0%", 0, 0, 0, 3, 1, 8, "B"]];
 
 function buildS(raw) {
   return raw.map((r, i) => {
-    const base = { id: i, n: r[0], o: r[1], t: r[2], a: r[3], is_: r[4], u: r[5], ir: r[6], ur: r[7], es_raw: r[11], alt_raw: 0 };
-    return { ...base, ...calcKPI(base) };
+    const base = { id: i, n: r[0], o: r[1], t: r[2], a: r[3], is_: r[4], u: r[5], ir: r[6], ur: r[7], es_raw: r[11], alt_raw: r[12] || 0 };
+    const kpi = calcKPI(base);
+    // r[13]: 시트 P열 실제총점, r[14]: 시트 Q열 실제등급
+    const actTotal = (r[13] != null && r[13] !== '' && !isNaN(Number(r[13]))) ? Math.round(Number(r[13])) : null;
+    const actGrade = (r[14] && ['A','B','C','D'].includes(String(r[14]).trim())) ? String(r[14]).trim() : null;
+    return { ...base, ...kpi, actTotal, actGrade };
   });
 }
 
@@ -613,35 +631,144 @@ window.addEventListener('load', () => {
 });
 
 /* ── xlsx 업로드 (숨김 행 제외) ── */
+/* ──────────────────────────────────────────────────────────────
+   xlsx 열 매핑 (공급망_분기별평가(2026) 시트 기준, 6행 헤더)
+   A(0):  협력사              → 협력사명
+   B(1):  item 목록           → 미사용
+   C(2):  26.1Q발주담당       → 미사용
+   D(3):  26.2Q 발주담당      → 담당자 ★
+   E(4):  TASK수              → TASK 건수
+   F(5):  매입대금            → 매입금액(원)
+   G(6):  이슈수              → 이슈 건수
+   H(7):  이슈율              → 이슈율 (소수 0.072 → 7.2%)
+   I(8):  미입하수            → 미입하 건수
+   J(9):  미입하율            → 미입하율 (소수 0.017 → 1.7%)
+   K(10): TASK 점수           → (미사용)
+   L(11): 매입대금 점수       → (미사용)
+   M(12): 이슈대응 점수       → (미사용)
+   N(13): 예외사항 점수       → es_raw (0~3)
+   O(14): 협력사 대체가능여부 → alt_raw (0~3)
+   P(15): 공급망 관리점수     → actTotal (현재기준 총점)
+   Q(16): 공급망 관리등급     → actGrade (현재기준 등급)
+────────────────────────────────────────────────────────────── */
+
+/* 소수/% 혼합 형태 → "7.2%" 문자열로 정규화
+   0.072 → "7.2%",  "7.2%" → "7.2%",  0 → "0.0%" */
+function normPctVal(v) {
+  if (v === null || v === undefined || v === '') return '0.0%';
+  const s = String(v).trim();
+  if (s.includes('%')) {
+    const n = parseFloat(s);
+    return isNaN(n) ? '0.0%' : n.toFixed(1) + '%';
+  }
+  const n = parseFloat(s);
+  if (!isNaN(n)) {
+    // 소수 형태 (0 이상 1 이하) → ×100
+    return (n > 0 && n <= 1) ? (n * 100).toFixed(1) + '%' : n.toFixed(1) + '%';
+  }
+  return '0.0%';
+}
+
 function loadXlsx(input) {
   const file = input.files[0]; if (!file) return;
   const rd = new FileReader();
   rd.onload = function (e) {
     try {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
+      const wb = XLSX.read(e.target.result, { type: 'array', cellFormula: false, cellNF: false });
+
+      /* ── 시트 선택: 공급망 분기별 평가 시트 우선, 없으면 첫 번째 ── */
+      const targetSheet = wb.SheetNames.find(n =>
+        n.includes('공급망_분기별평가') || n.includes('분기별평가') ||
+        n.includes('분기별 공급망') || n.includes('공급망 평가')
+      ) || wb.SheetNames[0];
+      const ws = wb.Sheets[targetSheet];
+
+      /* ── 숨김 행 수집 ── */
       const hiddenRows = new Set();
       if (ws['!rows']) ws['!rows'].forEach((row, idx) => { if (row && row.hidden) hiddenRows.add(idx); });
-      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      let hdr = -1;
-      for (let i = 0; i < rows.length; i++) { if (rows[i].some(c => String(c).includes('협력사'))) { hdr = i; break; } }
-      const st = hdr >= 0 ? hdr + 1 : 1;
+
+      /* raw_value: 수식이 아닌 계산된 값으로 읽기 */
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+
+      /* ── 헤더 행: 6행 고정(index=5) ── */
+      const FIXED_HDR = 5;
+      let hdrIdx = FIXED_HDR;
+      // 시트 구조 변경 대비 fallback
+      if (!rows[FIXED_HDR] || !rows[FIXED_HDR].some(c => String(c).includes('협력사'))) {
+        for (let i = 0; i < Math.min(rows.length, 15); i++) {
+          if (rows[i].some(c => String(c).includes('협력사'))) { hdrIdx = i; break; }
+        }
+      }
+
+      const st = hdrIdx + 1;
       const newRaw = [], seen = new Set();
+      const SKIP_NAMES = ['협력사', '협력사item', '합계', '소계', 'total', 'unnamed'];
+
       for (let i = st; i < rows.length; i++) {
         if (hiddenRows.has(i)) continue;
         const r = rows[i];
+
+        /* A열(0): 협력사명 */
         const name = String(r[0] || '').trim();
-        if (!name || seen.has(name) || name === '협력사') continue;
+        if (!name || seen.has(name)) continue;
+        if (SKIP_NAMES.some(k => name.toLowerCase().includes(k.toLowerCase()))) continue;
         seen.add(name);
-        newRaw.push([name, String(r[3] || '미지정').trim(), parseInt(String(r[4] || '0').replace(/,/g, '')) || 0, parseInt(String(r[5] || '0').replace(/,/g, '')) || 0, parseInt(r[6]) || 0, parseInt(r[7]) || 0, String(r[8] || '0%').trim(), String(r[9] || '0%').trim(), 0, 0, 0, parseInt(r[13]) || 0, 0, 'C']);
+
+        /* D열(3): 26.2Q 발주담당 */
+        const owner = String(r[3] || '미지정').trim() || '미지정';
+
+        /* E열(4): TASK수 */
+        const task = parseInt(String(r[4] || '0').replace(/,/g, '')) || 0;
+
+        /* F열(5): 매입대금 */
+        const amt = parseInt(String(r[5] || '0').replace(/,/g, '')) || 0;
+
+        /* G열(6): 이슈수 */
+        const iss = parseInt(r[6]) || 0;
+
+        /* H열(7): 이슈율 — 소수(0.072) 또는 %("7.2%") 혼용 */
+        const ir = normPctVal(r[7]);
+
+        /* I열(8): 미입하수 */
+        const unp = parseInt(r[8]) || 0;
+
+        /* J열(9): 미입하율 — 소수(0.017) 또는 %("1.7%") 혼용 */
+        const ur = normPctVal(r[9]);
+
+        /* N열(13): 예외사항 점수 (0~3 정수) */
+        const es = Math.min(3, Math.max(0, Math.round(parseFloat(r[13])) || 0));
+
+        /* O열(14): 협력사 대체가능여부 (0~3 숫자 직접 입력) */
+        const alt = Math.min(3, Math.max(0, Math.round(parseFloat(r[14])) || 1));
+
+        /* P열(15): 공급망 관리점수 (시트 실제 총점) */
+        const actT = (r[15] != null && r[15] !== '' && !isNaN(Number(r[15]))) ? Math.round(Number(r[15])) : null;
+
+        /* Q열(16): 공급망 관리등급 (시트 실제 등급) */
+        const actG = (r[16] && ['A','B','C','D'].includes(String(r[16]).trim())) ? String(r[16]).trim() : null;
+
+        // RAW 형식: [name, owner, t, a, is_, u, ir, ur, -, -, -, es_raw, alt_raw, actTotal, actGrade]
+        newRaw.push([name, owner, task, amt, iss, unp, ir, ur, 0, 0, 0, es, alt, actT, actG]);
       }
+
       if (newRaw.length > 0) {
         S = buildS(newRaw);
         const now = new Date();
-        document.getElementById('updLabel').innerHTML = `마지막 업데이트: <strong>${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}</strong>`;
+        const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+        document.getElementById('updLabel').innerHTML =
+          `마지막 업데이트: <strong>${dateStr}</strong>`;
+        document.getElementById('headerSub').textContent =
+          `공급망_분기별평가(2026) · 26.2Q 발주담당 기준 · 분기 예측 점수 적용`;
+        // localStorage에 저장
+        try {
+          localStorage.setItem('scm_kpi_raw', JSON.stringify(newRaw));
+          localStorage.setItem('scm_kpi_date', dateStr);
+        } catch(e) {}
         rebuildFilter(); renderAll();
-        alert(`✓ ${newRaw.length}개 협력사 데이터 업데이트 완료`);
-      } else alert('데이터를 읽지 못했습니다.');
+        alert(`✅ ${newRaw.length}개 협력사 업데이트 완료\n시트: ${targetSheet} / 헤더: ${hdrIdx + 1}행`);
+      } else {
+        alert(`⚠️ 데이터를 읽지 못했습니다.\n시트명에 "공급망_분기별평가"가 포함되어 있는지,\nA열에 협력사명이 있는지 확인해주세요.`);
+      }
     } catch (err) { alert('파싱 오류: ' + err.message); }
   };
   rd.readAsArrayBuffer(file);
@@ -666,8 +793,8 @@ function filteredS() {
 /* ── 지표 카드 ── */
 function renderMetrics() {
   const n = S.length, avg = (S.reduce((a, s) => a + s.total, 0) / n).toFixed(1);
-  const aC = S.filter(s => s.grade === 'A').length;
-  const bC = S.filter(s => s.grade === 'B').length;
+  const aC = S.filter(s => (s.actGrade || s.grade) === 'A').length;
+  const bC = S.filter(s => (s.actGrade || s.grade) === 'B').length;
   const wC = S.filter(s => s.is_ > 0).length;
   const tot = S.reduce((a, s) => a + s.a, 0);
   document.getElementById('metricsRow').innerHTML = `
@@ -715,35 +842,83 @@ function renderTable() {
   let data = filteredS();
   data.sort((a, b) => sb === 't' ? b.t - a.t : sb === 'a' ? b.a - a.a : sb === 'i' ? b.is_ - a.is_ : b.total - a.total);
   const show = data.slice(0, 60);
-  document.getElementById('tbody').innerHTML = show.map(s => `
+  document.getElementById('tbody').innerHTML = show.map(s => {
+    // 현재등급: 시트P열 있으면 우선, 없으면 분기예측 등급
+    const dispGrade = s.actGrade || s.grade;
+    const dispTotal = s.actTotal != null ? s.actTotal : null;
+    // 현재등급과 예측등급이 다를 때 표시
+    const gradeDiff = s.actGrade && s.actGrade !== s.grade;
+    return `
     <tr onclick="openM(${s.id})">
       <td title="${s.n}" style="font-weight:${s.total >= 6 ? '600' : '400'}">${s.n}</td>
       <td style="color:var(--text2)">${s.o}</td>
-      <td><span class="grade-badge g-${s.grade}">${s.grade}</span></td>
+      <td>
+        <span class="grade-badge g-${dispGrade}">${dispGrade}</span>
+        ${dispTotal != null ? `<span style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-left:3px">${dispTotal}점</span>` : ''}
+        ${gradeDiff ? `<span style="font-size:9px;color:var(--amber);margin-left:2px" title="분기예측: ${s.grade}등급">→${s.grade}</span>` : ''}
+      </td>
       <td><div class="score-bar"><span class="score-num" style="color:${scoreColor(s.total)}">${s.total}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(s.total / 15 * 100)}%;background:${scoreColor(s.total)}"></div></div></div></td>
       <td style="color:var(--text2);font-family:var(--mono)">${s.t.toLocaleString()}</td>
       <td style="font-size:10px;color:var(--text2);font-family:var(--mono)">${fmtAmt(s.a)}</td>
       <td style="font-size:10px;font-family:var(--mono);color:${parsePct(s.ir) > 10 ? 'var(--red)' : parsePct(s.ir) > 5 ? 'var(--amber)' : 'var(--text1)'}">${fmtPct(s.ir)} / ${fmtPct(s.ur)}</td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
   document.getElementById('tc').textContent = `전체 ${data.length}개사 중 ${Math.min(60, data.length)}개 표시`;
 }
 
-/* ── 차트 ── */
+/* ── 차트 (현재등급 기준) ── */
 function renderChart() {
   const cnt = { A: 0, B: 0, C: 0, D: 0 };
-  S.forEach(s => { cnt[s.grade] = (cnt[s.grade] || 0) + 1; });
-  document.getElementById('chartLegend').innerHTML = `
-    <span class="legend-item"><span class="legend-dot" style="background:#1D6ADB"></span>A (${cnt.A})</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#2D6A1F"></span>B (${cnt.B})</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#6B7280"></span>C (${cnt.C})</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#991B1B"></span>D (${cnt.D || 0})</span>
-  `;
+  S.forEach(s => { const g = s.actGrade || s.grade; cnt[g] = (cnt[g] || 0) + 1; });
+  const total = S.length || 1;
+
+  // 파스텔 색상
+  const COLORS = {
+    A: { bg: '#93C5FD', dot: '#93C5FD', label: 'A등급' },  // 파스텔 블루
+    B: { bg: '#86EFAC', dot: '#86EFAC', label: 'B등급' },  // 파스텔 그린
+    C: { bg: '#D1D5DB', dot: '#D1D5DB', label: 'C등급' },  // 파스텔 그레이
+    D: { bg: '#FCA5A5', dot: '#FCA5A5', label: 'D등급' },  // 파스텔 레드
+  };
+
+  document.getElementById('chartLegend').innerHTML = ['A','B','C','D'].map(g => {
+    const c = cnt[g] || 0;
+    const pct = Math.round(c / total * 100);
+    return `
+      <div class="legend-item">
+        <span class="legend-dot" style="background:${COLORS[g].bg}"></span>
+        <span class="legend-label">${g}</span>
+        <div class="legend-bar-wrap"><div class="legend-bar" style="width:${pct}%;background:${COLORS[g].bg}"></div></div>
+        <span class="legend-count">${c}개사</span>
+        <span class="legend-ratio">${pct}%</span>
+      </div>`;
+  }).join('');
+
   if (gcInst) gcInst.destroy();
   gcInst = new Chart(document.getElementById('gc'), {
     type: 'doughnut',
-    data: { labels: ['A', 'B', 'C', 'D'], datasets: [{ data: [cnt.A, cnt.B, cnt.C, cnt.D || 0], backgroundColor: ['#1D6ADB', '#2D6A1F', '#6B7280', '#991B1B'], borderWidth: 0, hoverOffset: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.label}등급: ${ctx.raw}개사 (${Math.round(ctx.raw / S.length * 100)}%)` } } } }
+    data: {
+      labels: ['A등급', 'B등급', 'C등급', 'D등급'],
+      datasets: [{
+        data: [cnt.A, cnt.B, cnt.C, cnt.D || 0],
+        backgroundColor: ['#93C5FD', '#86EFAC', '#D1D5DB', '#FCA5A5'],
+        borderColor: ['#BFDBFE', '#BBF7D0', '#E5E7EB', '#FECACA'],
+        borderWidth: 2,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.label}: ${ctx.raw}개사 (${Math.round(ctx.raw / total * 100)}%)`
+          }
+        }
+      }
+    }
   });
 }
 
@@ -827,25 +1002,39 @@ function renderTop5All() { renderTop5Task(); renderTop5Unpaid(); renderTop5Issue
 /* ── 모달 ── */
 function openM(id) {
   const s = S.find(x => x.id === id); if (!s) return;
+  const dispGrade = s.actGrade || s.grade;
   document.getElementById('modalName').textContent = s.n;
-  document.getElementById('modalMeta').textContent = `담당(26.04): ${s.o} · ${s.grade}등급 · 분기예측 ${s.total}/15점`;
+  document.getElementById('modalMeta').textContent = `담당(26.2Q): ${s.o} · 현재등급 ${dispGrade}${s.actTotal != null ? ` (${s.actTotal}점)` : ''} · 예측등급 ${s.grade} (${s.total}점)`;
   document.getElementById('modalNote').textContent = `분기 실적 기준 연간 환산 (TASK×4=${s.t * 4}건 / 매입×4=${fmtAmt(s.a * 4)}원)`;
   document.getElementById('modalKpi').innerHTML = `
     <div class="modal-kpi-card"><div class="modal-kpi-label">TASK 건수</div><div class="modal-kpi-val">${s.t.toLocaleString()}<span class="modal-kpi-unit">건</span></div></div>
     <div class="modal-kpi-card"><div class="modal-kpi-label">매입금액</div><div class="modal-kpi-val" style="font-size:13px">${fmtAmt(s.a)}<span class="modal-kpi-unit">원</span></div></div>
     <div class="modal-kpi-card"><div class="modal-kpi-label">이슈 / 미입하</div><div class="modal-kpi-val" style="font-size:13px;color:${parsePct(s.ir) > 5 ? 'var(--red)' : 'inherit'}">${fmtPct(s.ir)} / ${fmtPct(s.ur)}</div></div>
   `;
+  // 현재기준 총점 섹션 (P열 있을 때만)
+  const actSection = s.actTotal != null ? `
+    <div style="background:var(--blue-bg);border:1px solid var(--blue-soft);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:10px;font-weight:600;color:var(--blue);margin-bottom:2px;">현재 기준 등급 (시트 실적)</div>
+        <div style="font-size:11px;color:var(--text2);">공급망 관리점수 합산 기준</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="grade-badge g-${s.actGrade || s.grade}" style="width:26px;height:26px;font-size:13px;">${s.actGrade || s.grade}</span>
+        <span style="font-size:20px;font-weight:700;color:var(--blue);font-family:var(--mono);">${s.actTotal}<span style="font-size:11px;font-weight:400;color:var(--text2)">/15</span></span>
+      </div>
+    </div>` : '';
   document.getElementById('modalScore').innerHTML = `
-    <div class="score-bd-title">KPI 점수 세부 내역 (분기 환산 예측)</div>
+    ${actSection}
+    <div class="score-bd-title">KPI 점수 세부 내역 (분기×4 연간 환산 예측)</div>
     <div class="score-bd-items">
       <div class="score-bd-item"><div class="score-bd-lbl">TASK</div><div class="score-bd-val">${s.ts}<span class="score-bd-max">/3</span></div><div class="score-bd-sub">${s.t * 4}건</div></div>
       <div class="score-bd-item"><div class="score-bd-lbl">매입</div><div class="score-bd-val">${s.as_}<span class="score-bd-max">/3</span></div><div class="score-bd-sub">${fmtAmt(s.a * 4)}원</div></div>
       <div class="score-bd-item"><div class="score-bd-lbl">납기·이슈</div><div class="score-bd-val">${s.issScore}<span class="score-bd-max">/3</span></div><div class="score-bd-sub">${fmtPct(s.ir)} / ${fmtPct(s.ur)}</div></div>
       <div class="score-bd-item"><div class="score-bd-lbl">예외사항</div><div class="score-bd-val">${s.es}<span class="score-bd-max">/3</span></div><div class="score-bd-sub">정성값</div></div>
-      <div class="score-bd-item"><div class="score-bd-lbl">대체가능</div><div class="score-bd-val">${s.alt}<span class="score-bd-max">/3</span></div><div class="score-bd-sub">수기입력</div></div>
+      <div class="score-bd-item"><div class="score-bd-lbl">대체가능</div><div class="score-bd-val">${s.alt}<span class="score-bd-max">/3</span></div><div class="score-bd-sub">직접입력</div></div>
     </div>
     <div class="score-bd-total">
-      TASK(${s.ts}) + 매입(${s.as_}) + 납기이슈(${s.issScore}) + 예외(${s.es}) + 대체가능(${s.alt}) = <strong>${s.total}점 · ${s.grade}등급</strong>
+      TASK(${s.ts}) + 매입(${s.as_}) + 납기이슈(${s.issScore}) + 예외(${s.es}) + 대체가능(${s.alt}) = <strong>${s.total}점 · ${s.grade}등급 (예측)</strong>
     </div>
   `;
   document.getElementById('modal').classList.add('open');
@@ -854,8 +1043,26 @@ function closeM() { document.getElementById('modal').classList.remove('open'); }
 document.getElementById('modal').addEventListener('click', function (e) { if (e.target === this) closeM(); });
 
 function renderAll() { renderMetrics(); renderOwner(); renderTable(); renderChart(); renderWarns(); renderTop5All(); }
-rebuildFilter();
-renderAll();
+
+/* ── 초기 로드: localStorage 복원 ── */
+(function initFromStorage() {
+  try {
+    const saved = localStorage.getItem('scm_kpi_raw');
+    const savedDate = localStorage.getItem('scm_kpi_date');
+    if (saved) {
+      const raw = JSON.parse(saved);
+      if (Array.isArray(raw) && raw.length > 0) {
+        S = buildS(raw);
+        document.getElementById('updLabel').innerHTML =
+          `마지막 업데이트: <strong>${savedDate || '저장된 데이터'}</strong>`;
+        document.getElementById('headerSub').textContent =
+          `공급망_분기별평가(2026) · 26.2Q 발주담당 기준 · 분기 예측 점수 적용`;
+      }
+    }
+  } catch(e) {}
+  rebuildFilter();
+  renderAll();
+})();
 </script>
 </body>
 </html>
